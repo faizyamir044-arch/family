@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏠 سایت خانوادگی</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Tahoma', sans-serif; }
+  body {
+    min-height:100vh;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #6a3093 100%);
+    background-size: 300% 300%;
+    animation: bg 20s ease infinite;
+    display:flex; flex-direction:column; align-items:center;
+    padding:20px; color:#fff;
+  }
+  @keyframes bg { 0%,100%{background-position:0% 50%;} 50%{background-position:100% 50%;} }
+  h1 { font-size:2rem; margin-bottom:20px; text-shadow:0 3px 15px rgba(0,0,0,.4); text-align:center; }
+  .card {
+    background: rgba(255,255,255,.12); backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,.25); border-radius: 20px;
+    padding: 25px; box-shadow: 0 8px 32px rgba(0,0,0,.25);
+    width:100%; max-width:700px;
+  }
+  input, select {
+    width:100%; padding:12px; border-radius:10px; border:none;
+    margin-bottom:12px; font-family:inherit; font-size:1rem;
+    background: rgba(255,255,255,.9); color:#222;
+  }
+  button {
+    width:100%; padding:12px; border:none; border-radius:10px;
+    background: linear-gradient(90deg,#ff6a88,#ff99ac);
+    color:#fff; font-size:1rem; font-weight:bold; cursor:pointer;
+    transition: all .2s; box-shadow:0 4px 12px rgba(255,106,136,.4);
+  }
+  button:hover { transform:scale(1.02); }
+  button:active { transform:scale(.98); }
+  .hidden { display:none !important; }
+  .error {
+    background: rgba(231,76,60,.9); color:#fff; text-align:center;
+    margin-top:12px; padding:12px; border-radius:10px; font-size:.95rem;
+    font-weight:bold;
+  }
+  .hint { font-size:.8rem; opacity:.7; text-align:center; margin-top:12px; }
+  .warn {
+    background: rgba(241,196,15,.95); color:#222; text-align:center;
+    padding:12px; border-radius:10px; font-size:.9rem; font-weight:bold;
+    margin-bottom:15px; width:100%; max-width:900px;
+  }
+
+  #dashboard { width:100%; max-width:900px; }
+  .topbar {
+    display:flex; justify-content:space-between; align-items:center;
+    background: rgba(255,255,255,.12); backdrop-filter: blur(15px);
+    padding:15px 20px; border-radius:15px; margin-bottom:20px;
+    border:1px solid rgba(255,255,255,.25);
+    flex-wrap:wrap; gap:10px;
+  }
+  .topbar .user { font-weight:bold; font-size:1.1rem; }
+  .topbar button { width:auto; padding:8px 18px; font-size:.9rem; background:linear-gradient(90deg,#e74c3c,#c0392b); }
+
+  .members-grid {
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap:16px;
+  }
+  .member-card {
+    background: rgba(255,255,255,.1); backdrop-filter: blur(15px);
+    border:1px solid rgba(255,255,255,.25); border-radius:18px;
+    padding:20px; transition: transform .25s;
+  }
+  .member-card:hover { transform: translateY(-4px); }
+  .member-card.me { border:2px solid #ffd700; box-shadow:0 0 20px rgba(255,215,0,.3); }
+  .member-head {
+    display:flex; align-items:center; gap:12px; margin-bottom:15px;
+    padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,.2);
+  }
+  .avatar {
+    width:45px; height:45px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.5rem; background:rgba(255,255,255,.2);
+  }
+  .member-name { font-weight:bold; font-size:1.05rem; }
+  .task-count { font-size:.75rem; opacity:.7; }
+
+  .task {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:10px; border-radius:10px; margin-bottom:8px;
+    background: rgba(255,255,255,.08);
+    transition: all .2s;
+  }
+  .task.done { opacity:.5; text-decoration: line-through; }
+  .task input[type="checkbox"] { width:20px; height:20px; cursor:pointer; flex-shrink:0; margin-top:2px; }
+  .task label { flex:1; cursor:pointer; font-size:.95rem; line-height:1.5; }
+  .no-task { opacity:.5; font-size:.9rem; text-align:center; padding:20px 0; }
+
+  .add-task {
+    margin-top:20px; background: rgba(255,255,255,.1);
+    border:1px dashed rgba(255,255,255,.4); border-radius:15px;
+    padding:15px;
+  }
+  .add-task h3 { font-size:1rem; margin-bottom:10px; }
+  .add-task-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .add-task-row input, .add-task-row select {
+    flex:1; min-width:120px; margin-bottom:0; padding:10px;
+  }
+  .add-task-row button { width:auto; padding:10px 20px; }
+
+  .backup-bar {
+    margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;
+    background: rgba(255,255,255,.1); border-radius:15px;
+    padding:15px; justify-content:center;
+    border:1px solid rgba(255,255,255,.2);
+  }
+  .backup-bar button { width:auto; padding:10px 20px; font-size:.9rem; }
+  .backup-bar .export { background: linear-gradient(90deg,#3498db,#2980b9); }
+  .backup-bar .import { background: linear-gradient(90deg,#27ae60,#229954); }
+
+  .date-box { text-align:center; opacity:.8; font-size:.85rem; margin-bottom:15px; }
+  footer { margin-top:30px; opacity:.6; font-size:.8rem; text-align:center; }
+
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    padding: 12px 25px; border-radius: 25px; color: #fff;
+    font-weight: bold; font-size: .95rem; z-index: 9999;
+    box-shadow: 0 6px 20px rgba(0,0,0,.4);
+    transition: all .3s;
+  }
+  .toast.success { background: #27ae60; }
+  .toast.error { background: #e74c3c; }
+  .toast.hidden { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(20px); }
+</style>
+</head>
+<body>
+
+<div id="warnBox" class="warn hidden"></div>
+<div id="toast" class="toast hidden"></div>
+
+<!-- صفحه ورود -->
+<div id="loginPage">
+  <h1>🏠 سایت خانوادگی</h1>
+  <div class="card">
+    <h2 style="margin-bottom:20px; font-size:1.2rem; text-align:center;">ورود اعضای مجاز</h2>
+    <select id="loginUser">
+      <option value="">— انتخاب کاربر —</option>
+      <option value="irman">👨 ایرمان</option>
+      <option value="abbas">👨 عباس</option>
+      <option value="amirhossein">👦 امیرحسین</option>
+      <option value="maryam">👩 مریم</option>
+    </select>
+    <input type="password" id="loginPass" placeholder="رمز عبور (فقط یه عدد)">
+    <button id="loginBtn">ورود</button>
+    <div class="error hidden" id="loginError">❌ نام کاربری یا رمز اشتباهه</div>
+    <div class="hint">🔐 رمزها: ایرمان = 1 ، عباس = 2 ، امیرحسین = 3 ، مریم = 4</div>
+  </div>
+</div>
+
+<!-- داشبورد -->
+<div id="dashboard" class="hidden">
+  <div class="topbar">
+    <div>
+      <div class="user" id="welcome">سلام!</div>
+      <div class="date-box" id="todayDate"></div>
+    </div>
+    <button id="logoutBtn">🚪 خروج</button>
+  </div>
+
+  <h2 style="margin-bottom:15px; font-size:1.3rem;">📋 کارهای اعضای خانواده</h2>
+  <div class="members-grid" id="membersGrid"></div>
+
+  <div class="add-task">
+    <h3>➕ افزودن کار جدید</h3>
+    <div class="add-task-row">
+      <select id="newTaskOwner">
+        <option value="irman">ایرمان</option>
+        <option value="abbas">عباس</option>
+        <option value="amirhossein">امیرحسین</option>
+        <option value="maryam">مریم</option>
+      </select>
+      <input type="text" id="newTaskText" placeholder="مثلاً: خرید نان">
+      <button id="addTaskBtn">افزودن</button>
+    </div>
+  </div>
+
+  <div class="backup-bar">
+    <button class="export" id="exportBtn">💾 پشتیبان‌گیری (ذخیره فایل)</button>
+    <button class="import" id="importBtn">📂 بازیابی از فایل</button>
+    <input type="file" id="importFile" accept=".json" hidden>
+  </div>
+
+  <footer>ساخته‌شده با ❤️ برای خانواده</footer>
+</div>
+
+<script>
+// ========== تنظیمات ==========
+const MEMBERS = {
+  irman:       { name: 'ایرمان',    emoji: '👨', pass: '1' },
+  abbas:       { name: 'عباس',      emoji: '👨', pass: '2' },
+  amirhossein: { name: 'امیرحسین', emoji: '👦', pass: '3' },
+  maryam:      { name: 'مریم',      emoji: '👩', pass: '4' }
+};
+
+const DEFAULT_TASKS = [
+  { id: 1, owner: 'irman',       text: 'خرید میوه و سبزیجات هفته', done: false },
+  { id: 2, owner: 'irman',       text: 'تمیز کردن آشپزخانه', done: false },
+  { id: 3, owner: 'abbas',       text: 'پرداخت قبض برق', done: false },
+  { id: 4, owner: 'abbas',       text: 'بردن ماشین به سرویس', done: false },
+  { id: 5, owner: 'amirhossein', text: 'تمرین ریاضی صفحه ۴۵', done: false },
+  { id: 6, owner: 'amirhossein', text: 'مرتب کردن اتاق', done: false },
+  { id: 7, owner: 'maryam',      text: 'انجام تکالیف علوم', done: false },
+  { id: 8, owner: 'maryam',      text: 'آبیاری گلدان‌ها', done: false }
+];
+
+// ========== Toast ==========
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type || 'success');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.add('hidden'), 2500);
+}
+
+// ========== بررسی localStorage ==========
+let storageOK = true;
+try {
+  localStorage.setItem('__test__', '1');
+  if (localStorage.getItem('__test__') !== '1') throw new Error('read failed');
+  localStorage.removeItem('__test__');
+} catch(e) {
+  storageOK = false;
+  const w = document.getElementById('warnBox');
+  w.classList.remove('hidden');
+  w.textContent = '⚠️ مرورگر اجازه ذخیره نمی‌ده. لطفاً از حالت ناشناس خارج شو، یا فایل رو با کروم دیگه‌ای باز کن. از دکمه «پشتیبان‌گیری» استفاده کن.';
+}
+
+// ========== اعداد فارسی → انگلیسی ==========
+function normalizeDigits(str) {
+  return String(str)
+    .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+}
+
+// ========== داده‌ها ==========
+let tasks = [];
+let currentUser = null;
+
+function loadTasks() {
+  if (!storageOK) { tasks = JSON.parse(JSON.stringify(DEFAULT_TASKS)); return; }
+  const saved = localStorage.getItem('familyTasks');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        tasks = parsed;
+        return;
+      }
+    } catch(e) {}
+  }
+  tasks = JSON.parse(JSON.stringify(DEFAULT_TASKS));
+}
+
+function saveTasks() {
+  if (!storageOK) {
+    showToast('⚠️ ذخیره نشد — مرورگر اجازه نمی‌ده', 'error');
+    return;
+  }
+  try {
+    localStorage.setItem('familyTasks', JSON.stringify(tasks));
+    showToast('✓ ذخیره شد', 'success');
+  } catch(e) {
+    showToast('⚠️ خطا در ذخیره: ' + e.message, 'error');
+  }
+}
+
+// ========== پشتیبان‌گیری ==========
+function exportTasks() {
+  if (!tasks.length) { showToast('⚠️ کاری برای پشتیبان نیست', 'error'); return; }
+  const data = JSON.stringify({ tasks: tasks, date: new Date().toISOString() }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'family-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('✓ فایل پشتیبان دانلود شد', 'success');
+}
+
+function importTasks(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const data = JSON.parse(evt.target.result);
+      const importedTasks = Array.isArray(data) ? data : (data.tasks && Array.isArray(data.tasks) ? data.tasks : null);
+      if (!importedTasks) throw new Error('invalid');
+      if (!confirm('همه کارهای فعلی با فایل پشتیبان جایگزین می‌شن. مطمئنی؟')) return;
+      tasks = importedTasks;
+      saveTasks();
+      renderMembers();
+      showToast('✓ بازیابی شد (' + tasks.length + ' کار)', 'success');
+    } catch(err) {
+      showToast('⚠️ فایل معتبر نیست', 'error');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ========== ورود ==========
+function login() {
+  const user = document.getElementById('loginUser').value;
+  const pass = normalizeDigits(document.getElementById('loginPass').value.trim());
+  const err = document.getElementById('loginError');
+
+  if (!user || !MEMBERS[user] || MEMBERS[user].pass !== pass) {
+    err.classList.remove('hidden');
+    return;
+  }
+  err.classList.add('hidden');
+  currentUser = user;
+  if (storageOK) {
+    try { localStorage.setItem('familyUser', user); } catch(e) {}
+  }
+  showDashboard();
+}
+
+function logout() {
+  currentUser = null;
+  if (storageOK) {
+    try { localStorage.removeItem('familyUser'); } catch(e) {}
+  }
+  document.getElementById('loginPage').classList.remove('hidden');
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginUser').value = '';
+}
+
+// ========== داشبورد ==========
+function showDashboard() {
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+  document.getElementById('welcome').textContent =
+    'سلام ' + MEMBERS[currentUser].emoji + ' ' + MEMBERS[currentUser].name + '!';
+  const d = new Date();
+  const days = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+  let dateStr = days[d.getDay()];
+  try { dateStr += '، ' + d.toLocaleDateString('fa-IR'); } catch(e) {}
+  document.getElementById('todayDate').textContent = dateStr;
+  renderMembers();
+}
+
+function renderMembers() {
+  const grid = document.getElementById('membersGrid');
+  grid.innerHTML = '';
+
+  Object.keys(MEMBERS).forEach(function(key) {
+    const member = MEMBERS[key];
+    const memberTasks = tasks.filter(function(t) { return t.owner === key; });
+    const doneCount = memberTasks.filter(function(t) { return t.done; }).length;
+    const isMe = key === currentUser;
+
+    const card = document.createElement('div');
+    card.className = 'member-card' + (isMe ? ' me' : '');
+
+    let tasksHTML = '';
+    if (memberTasks.length === 0) {
+      tasksHTML = '<div class="no-task">کاری ثبت نشده ✨</div>';
+    } else {
+      tasksHTML = memberTasks.map(function(t) {
+        return '<div class="task ' + (t.done ? 'done' : '') + '">' +
+          '<input type="checkbox" ' + (t.done ? 'checked' : '') +
+          ' onchange="toggleTask(' + t.id + ')"' +
+          (!isMe ? ' disabled' : '') + '>' +
+          '<label onclick="' + (isMe ? 'toggleTask(' + t.id + ')' : '') + '">' +
+          escapeHTML(t.text) + '</label>' +
+        '</div>';
+      }).join('');
+    }
+
+    card.innerHTML =
+      '<div class="member-head">' +
+        '<div class="avatar">' + member.emoji + '</div>' +
+        '<div>' +
+          '<div class="member-name">' + member.name + (isMe ? ' (شما)' : '') + '</div>' +
+          '<div class="task-count">' + doneCount + ' از ' + memberTasks.length + ' انجام شده</div>' +
+        '</div>' +
+      '</div>' + tasksHTML;
+
+    grid.appendChild(card);
+  });
+}
+
+function toggleTask(id) {
+  const task = tasks.find(function(t) { return t.id === id; });
+  if (!task || task.owner !== currentUser) return;
+  task.done = !task.done;
+  saveTasks();
+  renderMembers();
+}
+
+function addTask() {
+  const owner = document.getElementById('newTaskOwner').value;
+  const text = document.getElementById('newTaskText').value.trim();
+  if (!text) return;
+  const newId = tasks.length ? Math.max.apply(null, tasks.map(function(t){return t.id;})) + 1 : 1;
+  tasks.push({ id: newId, owner: owner, text: text, done: false });
+  saveTasks();
+  document.getElementById('newTaskText').value = '';
+  renderMembers();
+}
+
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+// ========== اتصال دکمه‌ها ==========
+document.getElementById('loginBtn').addEventListener('click', login);
+document.getElementById('loginPass').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') login();
+});
+document.getElementById('logoutBtn').addEventListener('click', logout);
+document.getElementById('addTaskBtn').addEventListener('click', addTask);
+document.getElementById('newTaskText').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') addTask();
+});
+document.getElementById('exportBtn').addEventListener('click', exportTasks);
+document.getElementById('importBtn').addEventListener('click', function() {
+  document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', importTasks);
+
+// ========== شروع ==========
+loadTasks();
+if (storageOK) {
+  try {
+    const savedUser = localStorage.getItem('familyUser');
+    if (savedUser && MEMBERS[savedUser]) {
+      currentUser = savedUser;
+      showDashboard();
+    }
+  } catch(e) {}
+}
+</script>
+
+</body>
+</html>
